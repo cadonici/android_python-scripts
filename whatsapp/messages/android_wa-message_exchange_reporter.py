@@ -1,6 +1,16 @@
+#WhatsApp Message Exchange Reporter
+# This script generates a report of phone numbers involved in WhatsApp message exchanges. The report includes details such as the display name (if available), phone number, message count, and raw string associated with the contact. The script first connects to the 'msgstore.db' and 'wa.db' SQLite databases, which are commonly used by WhatsApp. It then retrieves information from these databases and sorts the results based on message count and display name.
+
+
+
 import sqlite3
 # Explanation about the sorting criteria
 print("\nScript to generate a report of all phone numbers involved in WhatsApp message exchanges.\n \nResults are sorted by Message Count (descending) and then by Display Name. \n \n")
+# Prompt the user to place 'msgstore.db' and 'wa.db' databases in the script's directory
+input("Please ensure that 'msgstore.db' and 'wa.db' databases are in the same directory as this script. Press Enter to continue...")
+
+# Explanation about the script
+# ... (rest of the script remains unchanged)
 
 # 
 
