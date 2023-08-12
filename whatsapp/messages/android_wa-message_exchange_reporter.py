@@ -1,11 +1,12 @@
 #WhatsApp Message Exchange Reporter
 # This script generates a report of phone numbers involved in WhatsApp message exchanges. The report includes details such as the display name (if available), phone number, message count, and raw string associated with the contact. The script first connects to the 'msgstore.db' and 'wa.db' SQLite databases, which are commonly used by WhatsApp. It then retrieves information from these databases and sorts the results based on message count and display name.
 
-
-
 import sqlite3
+
 # Explanation about the sorting criteria
-print("\nScript to generate a report of all phone numbers involved in WhatsApp message exchanges.\n \nResults are sorted by Message Count (descending) and then by Display Name. \n \n")
+print("\nScript to generate a report of all phone numbers involved in WhatsApp message exchanges.\n")
+print("Results are sorted by Message Count (descending) and then by Display Name.\n\n")
+
 # Prompt the user to place 'msgstore.db' and 'wa.db' databases in the script's directory
 input("Please ensure that 'msgstore.db' and 'wa.db' databases are in the same directory as this script. Press Enter to continue...")
 
@@ -66,7 +67,7 @@ for msgstore_result in results_msgstore:
             break
 
 # Sort results by Message Count (descending) and then by Display Name
-sorted_results.sort(key=lambda x: (x[2], x[0] if x[0] is not None else "" ), reverse=True)
+sorted_results.sort(key=lambda x: (x[2], x[0] if x[0] is not None else ""), reverse=True)
 
 # Print sorted results
 for display_name, phone_number, message_count, raw_string in sorted_results:
@@ -75,4 +76,8 @@ for display_name, phone_number, message_count, raw_string in sorted_results:
     print("Message Count:", message_count)
     print("Raw String:", raw_string)
     print("-" * 30)
+
+# Print the total number of contacts with message exchanges
+print("\nTotal number of contacts with message exchanges:", len(sorted_results))
+
 
