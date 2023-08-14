@@ -10,11 +10,6 @@ print("Results are sorted by Message Count (descending) and then by Display Name
 # Prompt the user to place 'msgstore.db' and 'wa.db' databases in the script's directory
 input("Please ensure that 'msgstore.db' and 'wa.db' databases are in the same directory as this script. Press Enter to continue...")
 
-# Explanation about the script
-# ... (rest of the script remains unchanged)
-
-# 
-
 # Connect to the msgstore.db database
 conn_msgstore = sqlite3.connect('msgstore.db')
 cursor_msgstore = conn_msgstore.cursor()
@@ -71,10 +66,10 @@ sorted_results.sort(key=lambda x: (x[2], x[0] if x[0] is not None else ""), reve
 
 # Print sorted results
 for display_name, phone_number, message_count, raw_string in sorted_results:
-    print("Display Name:", display_name)
-    print("Phone Number:", phone_number)
-    print("Message Count:", message_count)
-    print("Raw String:", raw_string)
+    print("Display Name: ", display_name)
+    print("Phone Number: ", phone_number)
+    print("Message Count: ", message_count)
+    print("Raw String: ", raw_string)
     print("-" * 30)
 
 # Print the total number of contacts with message exchanges
