@@ -14,11 +14,12 @@ def main():
 
     # Define the SQL query for msgstore.db
     query_msgstore = '''
-    SELECT
+ SELECT
         jid.raw_string,
         jid.user AS "Phone Number",
         CASE
-            WHEN message_ephemeral_setting.setting_duration >= 86400 THEN
+            WHEN message_ephemeral_setting.setting_duration = 0 THEN '(deactivated)'
+            WHEN message_ephemeral_setting.setting_duration > 86400 THEN
                 CAST(message_ephemeral_setting.setting_duration / 86400 AS VARCHAR) || ' days'
             WHEN message_ephemeral_setting.setting_duration >= 3600 THEN
                 CAST(message_ephemeral_setting.setting_duration / 3600 AS VARCHAR) || ' hours'
@@ -63,7 +64,12 @@ def main():
     conn_wa.close()
 
     # Compare and print results
-    sorted_results = []
+
+ 
+
+
+
+    sorted_results = {}
     for msgstore_result in results_msgstore:
         jid_raw_string = msgstore_result[0]
         phone_number = msgstore_result[1]
@@ -72,10 +78,13 @@ def main():
         for wa_result in results_wa:
             wa_jid, display_name, wa_name = wa_result
             if jid_raw_string == wa_jid:
-                sorted_results.append((display_name, phone_number, wa_name, expiration_setting))
+                key = (display_name, wa_name, phone_number)
+                if key not in sorted_results:
+                    sorted_results[key] = [expiration_setting]
+                else:
+                    sorted_results[key].append(expiration_setting)
                 break
-
-
+    
     # Connect to the wa.db database
     conn_wa = sqlite3.connect('wa.db')
     cursor_wa = conn_wa.cursor()
@@ -120,15 +129,34 @@ def main():
 
 
     input("\nPress Enter to retrieve results from 'msgstore.db'...")
+
+
+
     
-    # Print the results
-    print("\nResults from 'msgstore.db':\n")
-    for display_name, phone_number, wa_name, expiration_setting in sorted_results:
-        print("Display Name:", display_name if display_name is not None else "N/A")
+    # Print the consolidated results
+    print("\nConsolidated results from 'msgstore.db':")
+    for key, expiration_settings in sorted_results.items():
+        display_name, wa_name, phone_number = key
+        print("Display Name:", display_name)
         print("WhatsApp Name:", wa_name)
         print("Phone Number:", phone_number)
-        print("Expiration Setting:", expiration_setting)
-        print("------------------------")
+        
+        # Replace "0 seconds" with "deactivated" in expiration settings
+        adjusted_settings = [setting if setting != "0 seconds" else "(deactivated)" for setting in expiration_settings]
+        adjusted_settings_string = ", ".join(adjusted_settings)
+        
+        # Remove the comma before "deactivated"
+        adjusted_settings_string = adjusted_settings_string.replace(", (deactivated)", " (deactivated)")
+        
+        print("Expiration Settings:", adjusted_settings_string)
+        print("-" * 30)
+
+
+    
+    # Remove the comma before "deactivated"
+    adjusted_settings_string = adjusted_settings_string.replace(", deactivated", " deactivated")
+    
+
 
 
     input("\nPress Enter to retrieve results from 'wa.db'...")
