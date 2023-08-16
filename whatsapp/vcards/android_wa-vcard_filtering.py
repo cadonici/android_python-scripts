@@ -17,6 +17,12 @@ print("-" * 30)
 # Create a list to store extracted vCard details
 vcard_details = []
 
+# Function to clean phone number
+def clean_phone_number(number):
+    # Remove spaces and numbers between ":" and "+"
+    clean_number = ''.join(part for part in number.split(':') if not part.strip().isdigit() and part != '+')
+    return clean_number
+
 # Loop through distinct vCards and extract details
 for vcard_row in distinct_vcards:
     vcard_data = vcard_row[0]
@@ -28,18 +34,30 @@ for vcard_row in distinct_vcards:
     for line in lines:
         if line.startswith('FN:'):
             fn = line[3:]
-        elif line.startswith('item1.TEL:'):
-            tel = line[11:]
+        elif "TEL" in line:
+            tel_parts = line.split('TEL')[1].strip()
+            tel = ""
+            label = ""
+
+            for part in tel_parts.split(';'):
+                if part.startswith('type='):
+                    label = part[5:]
+                elif part.startswith('waid='):
+                    tel = part[5:].strip()  # Apply strip() to remove spaces
+            if not tel:
+                tel = tel_parts.strip()  # Apply strip() to remove spaces
         elif line.startswith('item1.X-ABLabel:'):
             label = line[16:]
 
     # If item1.TEL: is not present, look for item1.TEL;waid=
     if not tel:
         for line in lines:
-            if line.startswith('item1.TEL;waid='):
-                tel = line.split('=')[1]
+            if "waid=" in line:
+                tel = line.split('=')[1].strip()  # Apply strip() to remove spaces
 
-    vcard_details.append((fn, tel, label))
+    if tel:  # Check if tel value is not empty
+        tel = clean_phone_number(tel)  # Clean phone number
+        vcard_details.append((fn, tel, label))
 
 # Sort the vCard details list alphabetically by FN
 vcard_details.sort(key=lambda x: x[0])
@@ -47,9 +65,8 @@ vcard_details.sort(key=lambda x: x[0])
 # Print the sorted vCard details
 for fn, tel, label in vcard_details:
     print("FN:", fn)
-    print("item1.TEL:", tel)
-    print("item1.X-ABLabel:", label)
+    print("Phone Number:", tel.replace(" ", ""))  # Remove spaces from phone number
+    print("Label:", label)
     print("-" * 30)
-
 # Close the database connection
 conn.close()
