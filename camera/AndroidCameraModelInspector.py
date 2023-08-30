@@ -79,7 +79,9 @@ all_images_report = []
 while True:
     with tempfile.TemporaryDirectory() as temp_dir:
         metadata_counts = defaultdict(int)
-
+        latitude = None
+        longitude = None
+        address = None
         for filename in os.listdir(current_directory):
             if filename.lower().endswith('.zip'):
                 zip_path = os.path.join(current_directory, filename)
@@ -198,9 +200,7 @@ while True:
                                             latitude = get_decimal_from_dms(gps_info.get('GPSLatitude', (0, 0, 0)), gps_info.get('GPSLatitudeRef', 'N'))
                                             longitude = get_decimal_from_dms(gps_info.get('GPSLongitude', (0, 0, 0)), gps_info.get('GPSLongitudeRef', 'E'))
                                             altitude = gps_info.get('GPSAltitude', None)
-                                            print("Image path:", image_file)
-                                            print("Latitude:", latitude)
-                                            print("Longitude:", longitude)                                                                                        
+                                            print("Image path:", image_file)                                                                                       
                                             if altitude is not None:
                                                 print(f"Altitude: {altitude} meters")
                                             latitude_string = str(latitude)
@@ -240,17 +240,17 @@ while True:
                                         altitude = -altitude
                                     altitude_in_meters = altitude if gps_altitude_ref == 0 else -altitude
                                 else:
-                                    altitude_in_meters = 0
+                                        altitude_in_meters = 0
 
                                 if len(gps_latitude) >= 3 and len(gps_longitude) >= 3:
-                                        gps_latitude_decimal = convert_coordinate(gps_latitude[0][0], gps_latitude[1][0], gps_latitude[2][0], gps_data.get(piexif.GPSIFD.GPSLatitudeRef, b'N'))
-                                        gps_longitude_decimal = convert_coordinate(gps_longitude[0][0], gps_longitude[1][0], gps_longitude[2][0], gps_data.get(piexif.GPSIFD.GPSLongitudeRef, b'E'))
-                                        address_nominatim = get_address_from_gps_nominatim(gps_latitude_decimal, gps_longitude_decimal)
+                                        latitude = convert_coordinate(gps_latitude[0][0], gps_latitude[1][0], gps_latitude[2][0], gps_data.get(piexif.GPSIFD.GPSLatitudeRef, b'N'))
+                                        longitude = convert_coordinate(gps_longitude[0][0], gps_longitude[1][0], gps_longitude[2][0], gps_data.get(piexif.GPSIFD.GPSLongitudeRef, b'E'))
+                                        address = get_address_from_gps_nominatim(latitude, longitude)
                                         print("Image path:", image_path_in_zip_short)
                                         print("Exif date:", exif_datetime)
-                                        print("Exif GPS Latitude:", gps_latitude_decimal)
-                                        print("Exif GPS Longitude:", gps_longitude_decimal)
-                                        print("Address):", address_nominatim)
+                                        print("Exif GPS Latitude:", latitude)
+                                        print("Exif GPS Longitude:", longitude)
+                                        print("Address:", address)
                                         with open(image_path, 'rb') as img_file:
                                                     image_content = img_file.read()
                                                     image_hash = hashlib.sha1(image_content).hexdigest()
@@ -262,11 +262,11 @@ while True:
                                         print("Exif GPS Altitude: Not available")
                                         print("Exif GPS Latitude: Not available")
                                         print("Exif GPS Longitude: Not available")
-                                        # Calculate the SHA-1 hash of the image content
+                                        #Calculate the SHA-1 hash of the image content
                                         with open(image_path, 'rb') as img_file:
-                                                    image_content = img_file.read()
-                                                    image_hash = hashlib.md5(image_content).hexdigest()
-                                                    print("MD5 Hash:", image_hash)
+                                                   image_content = img_file.read()
+                                                   image_hash = hashlib.sha1(image_content).hexdigest()
+                                                   print("SHA-1 Hash:", image_hash)
                                         print("=" * 60)
 
 
@@ -295,14 +295,28 @@ while True:
                             # Copy image to subdirectory
                             new_image_path = os.path.join(output_subdirectory, new_image_name)
                             shutil.copy(image_path, new_image_path)
-                            
-                            all_images_report.append(f"Image path: {image_path_in_zip_short}")
+                            all_images_report.append(f"Image path: {image_path_in_zip_short}")                          
                             all_images_report.append(f"Exif date: {exif_datetime}")
-                            all_images_report.append(f"Exif GPS Latitude: {gps_latitude_decimal}")
-                            all_images_report.append(f"Exif GPS Longitude: {gps_longitude_decimal}")
-                            all_images_report.append(f"Address: {address_nominatim}")
+
+
+                            if latitude is not None:
+                                all_images_report.append(f"Exif GPS Latitude: {latitude}")
+                            else:
+                                all_images_report.append(f"Exif GPS Latitude: None")
+                            if longitude is not None:
+                                all_images_report.append(f"Exif GPS Longitude: {longitude}")
+                            else:
+                                all_images_report.append(f"Exif GPS Longitude: None")
+                            if address is not None:
+                                all_images_report.append(f"Address: {address}")
+                            else:
+                                all_images_report.append(f"Address: None")
+
                             all_images_report.append(f"SHA-1 Hash: {image_hash}")
                             all_images_report.append("=" * 60)
+
+                            
+                            
 
         print("Images have been copied to:", output_directory)
 
