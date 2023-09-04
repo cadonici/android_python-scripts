@@ -1,4 +1,4 @@
-print("Android Contacts Parser")
+print("Android Contacts Analyzer")
 print("Developed by: Luca Cadonici")
 print("This script connects to a 'wa.db' database containing Android's Phonebook and WahtsApp contacts.")
 print("It allows you to search for contacts based on WhatsApp name, display name, or phone number.")
